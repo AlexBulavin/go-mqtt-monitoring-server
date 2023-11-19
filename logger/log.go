@@ -12,7 +12,7 @@ const defaultAPIToken = "427627935:AAFYF7PzAWfQBFiAEqeijbpu5TOJsydEbSo"
 const defaultTargetUser = "254169872"
 
 type TelegramLogger struct {
-	APIToken string
+	APIToken   string
 	TargetUser string
 }
 
@@ -27,5 +27,8 @@ func (t *TelegramLogger) Init() *TelegramLogger {
 // Log method calls Telegram API and sends the log message to TargetUser.
 func (t *TelegramLogger) Log(data string) {
 	r, _ := http.Get("https://api.telegram.org/bot" + t.APIToken + "/sendMessage?chat_id=" + t.TargetUser + "&text=" + url.QueryEscape(data))
-	r.Body.Close()
+	err := r.Body.Close()
+	if err != nil {
+		return
+	}
 }

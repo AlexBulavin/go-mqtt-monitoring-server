@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"go-mqtt-monitoring-server/logger" // change this path to your local GOPATH format. ex: myProjectDir/logger
 	"os"
 	"strconv"
 	"strings"
 	"sync"
-	"tempratureMqtt/logger" // change this path to your local GOPATH format. ex: myProjectDir/logger
 	"time"
 )
 
