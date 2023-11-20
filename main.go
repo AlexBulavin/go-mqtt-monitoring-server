@@ -12,7 +12,7 @@ import (
 )
 
 // MQTT credentials(you may have username and password too)
-const mqttServer = "192.168.110.2:1883"   //Эта константа определяет адрес (IP и порт) брокера MQTT, к которому программа будет подключаться. В данном случае, брокер находится по IP-адресу 192.168.100.2 и слушает порт 1883.
+const mqttServer = "127.0.0.1:1883"       //Эта константа определяет адрес (IP и порт) брокера MQTT, к которому программа будет подключаться. В данном случае, брокер находится по IP-адресу 192.168.100.2 и слушает порт 1883.
 const mqttClientID = "some-unique-string" //Идентификатор клиента MQTT:
 
 // MQTT topics(channels) that we work with.
