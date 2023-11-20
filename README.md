@@ -55,6 +55,23 @@ After that it will log the acknowledge to an online log channel based on a Teleg
 Далее при запущенном MQTT брокере запускаем сервис мониторинга настоящего проекта, прописывая его 
 хост и порт таким, какой задали для брокера.
 По умолчанию (если ничего не задавать на брокере) это 127.0.0.1:1883
+Топики пока жёстко заданы в коде:
+// MQTT topics(channels) that we work with.
+const tempTopic = "/temperature"
+const actionTopic = "/action"
+const monitorTopic = "/monitor"
+
+В них можно публиковать данный и читать из них данные.
+Чтение происходит автоматически через запущенный сервис с выводом в заданном формате.
+Но также можно и вручную из другого окна терминала писать и читать топики (эти и другие):
+>mosquitto_pub -h localhost -t "/temperature" -m "28.5"
+
+Или
+>mosquitto_sub -h localhost -t "/temperature"
+
+При этом сервис будет автоматически выводить на экран те же данные с меткой времени по заданному формату:
+>[2023-11-20 00:23:54] temperature:  28.5
+
 
 # Associated resources
 - Introduction and review video: [youtu.be/zXzmXzBmWdY](https://youtu.be/zXzmXzBmWdY)
