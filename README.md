@@ -56,11 +56,18 @@ After that it will log the acknowledge to an online log channel based on a Teleg
 Далее при запущенном MQTT брокере запускаем сервис мониторинга настоящего проекта, прописывая его 
 хост и порт таким, какой задали для брокера.
 По умолчанию (если ничего не задавать на брокере) это 127.0.0.1:1883
-Топики пока жёстко заданы в коде:
+
+Начальные топики жёстко заданы в коде:
 // MQTT topics(channels) that we work with.
-const tempTopic = "/temperature"
-const actionTopic = "/action"
-const monitorTopic = "/monitor"
+const tempTopic = "/temperature" - историческое наследие, он будет не удалён или заменим на тот, что нужен для мониторинга систамы в целом
+const actionTopic = "/action" - тоже историческое наследие и может пригодиться только для управления системой. 
+То есть и брокером и структурой подписок и так далее 
+const monitorTopic = "/monitor" Топик, для перехвата изменений и вывод в консоль новых данных.
+Может работать как Kibana
+const newObjectRegistryTopic = "/new_object_registry" - Топик в который обращаются новые "машинки" чтобы зарегистрироваться и получить
+два топика - управление в поддиректории /actions/ и статус в поддиректории /state/.
+const stateTopicPrefix = "/state/" - поддиректория топиков для передачи каждой "машинкой" своего статуса
+const actionTopicPrefix = "/action/" - поддиректория топиков для передачи команд от сервера на каждую "машинку".
 
 В них можно публиковать данный и читать из них данные.
 Чтение происходит автоматически через запущенный сервис с выводом в заданном формате.
@@ -97,6 +104,13 @@ const monitorTopic = "/monitor"
 >mosquitto_sub -h localhost -t "test/topic" //Подписались на test/topic
 
 >mosquitto_pub -h localhost -t "test/topic" -m "Hello, MQTT!"//Опубликовали сообщение в test/topic
+
+При обращении новой "машинки" к брокеру в топик "/new_object_registry" она сообщает свой ID, а сервер подтверждает ей
+создание "пространства" в папках "/state/" и "/action/" равному id "машинки" + уникальный идентификатор
+Например, ID машинки 123456, брокер создаёт топик 1234560001 в папках state и action
+Теперь при получении сообщения в топике "/new_object_registry" с идентификатором клиента в 
+поле payload будут создаваться новые топики вида "/state/clientID" и "/action/clientID" 
+для этого клиента.
 
 # Associated resources
 - Introduction and review video: [youtu.be/zXzmXzBmWdY](https://youtu.be/zXzmXzBmWdY)

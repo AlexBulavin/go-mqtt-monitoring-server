@@ -14,19 +14,26 @@ import (
 const mqttServer = "127.0.0.1:1883"
 const mqttClientID = "some-unique-string"
 
+/*
+вся бизнес-логика связана с этим внутренним клиентом MQTT mqttClientID. Этот клиент играет центральную роль в обработке сообщений, управлении подписками на топики и отправке сообщений на брокер MQTT. В обработчиках, таких как temperatureCallback, monitorCallback и newObjectRegistryCallback, осуществляется логика, связанная с приемом и обработкой сообщений внутри топиков.
+
+Он также участвует в создании и управлении топиками для новых клиентов, как было добавлено в предыдущих изменениях кода.
+*/
+
 const tempTopic = "/temperature"
 const actionTopic = "/action"
-const monitorTopic = "/monitor"
-const newObjectRegistryTopic = "/new_object_registry"
-const stateTopicPrefix = "/state/"
-const actionTopicPrefix = "/action/"
+const monitorTopic = "/monitor"                       //Вывод данных в консоль при изменениях в temperature
+const newObjectRegistryTopic = "/new_object_registry" //Регистрация новой "машинки"
+const stateTopicPrefix = "/state/"                    //Каталог топиков со статусами "машинок"
+const actionTopicPrefix = "/action/"                  //Каталог топиков с командами для "машинок"
 
 var minTemp float64 = 28.0
 var maxTemp float64 = 29.0
 
 var wg = sync.WaitGroup{}
-var existingClients = make(map[string]bool)
-var mutex = &sync.Mutex{}
+var existingClients = make(map[string]bool) //Здесь будет массив клиентов. Только его нужно превратить в объект БД
+//И хранить их в БД, а не в переменной.
+var mutex = &sync.Mutex{} //Объект mutex для транзакционной работы с новыми клиентами
 
 func main() {
 	wg.Add(1)
@@ -35,16 +42,17 @@ func main() {
 
 	c := createClient()
 	//В зависимости от созданной подписки
-	if token := c.Subscribe(tempTopic, 0, actionCallback); token.Wait() && token.Error() != nil {
+	//Если обращение в топик tempTopic = "/temperature", вызываем коллбэк temperatureCallback
+	if token := c.Subscribe(tempTopic, 0, temperatureCallback); token.Wait() && token.Error() != nil {
 		fmt.Println(token.Error())
 		os.Exit(1)
 	}
-
+	//Если обращение в топик monitorTopic = "/monitor", вызываем коллбэк monitorCallback
 	if token := c.Subscribe(monitorTopic, 0, monitorCallback); token.Wait() && token.Error() != nil {
 		fmt.Println(token.Error())
 		os.Exit(1)
 	}
-
+	//Если обращение в топик newObjectRegistryTopic = "/new_object_registry", вызываем коллбэк newObjectRegistryCallback
 	if token := c.Subscribe(newObjectRegistryTopic, 0, newObjectRegistryCallback); token.Wait() && token.Error() != nil {
 		fmt.Println(token.Error())
 		os.Exit(1)
@@ -53,6 +61,13 @@ func main() {
 	wg.Wait()
 }
 
+//Создаём внутреннего клиента для реализации бизнес-логики
+/*
+mqtt.NewClientOptions(): Создает новый объект настроек для MQTT-клиента.
+AddBroker("tcp://" + mqttServer): Устанавливает адрес брокера MQTT для подключения.
+SetClientID(mqttClientID): Устанавливает идентификатор клиента MQTT.
+opts.AutoReconnect = true: Включает автоматическое переподключение к брокеру в случае разрыва соединения.
+Функция createClient() в вашем коде отвечает за создание и настройку нового объекта MQTT-клиента (c).*/
 func createClient() mqtt.Client {
 	opts := mqtt.NewClientOptions().AddBroker("tcp://" + mqttServer).SetClientID(mqttClientID)
 	opts.AutoReconnect = true
@@ -65,7 +80,7 @@ func createClient() mqtt.Client {
 	return c
 }
 
-func actionCallback(client mqtt.Client, msg mqtt.Message) {
+func temperatureCallback(client mqtt.Client, msg mqtt.Message) {
 	payload := msg.Payload()
 	actionHandler(client, string(payload))
 	killSwitch(string(payload))
@@ -149,7 +164,7 @@ func createClientTopics(client mqtt.Client, clientID string) {
 		os.Exit(1)
 	}
 
-	if token := client.Subscribe(actionTopic, 0, actionCallback); token.Wait() && token.Error() != nil {
+	if token := client.Subscribe(actionTopic, 0, temperatureCallback); token.Wait() && token.Error() != nil {
 		fmt.Println(token.Error())
 		os.Exit(1)
 	}
