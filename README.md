@@ -52,6 +52,7 @@ After that it will log the acknowledge to an online log channel based on a Teleg
 или
 >brew services stop mosquitto 
 
+
 Далее при запущенном MQTT брокере запускаем сервис мониторинга настоящего проекта, прописывая его 
 хост и порт таким, какой задали для брокера.
 По умолчанию (если ничего не задавать на брокере) это 127.0.0.1:1883
@@ -72,6 +73,30 @@ const monitorTopic = "/monitor"
 При этом сервис будет автоматически выводить на экран те же данные с меткой времени по заданному формату:
 >[2023-11-20 00:23:54] temperature:  28.5
 
+Используйте команду netstat в командной строке, чтобы посмотреть, какие порты открыты на вашей локальной машине. 
+
+Например:
+>netstat -tuln
+
+Используйте команды для просмотра процессов и поиска брокера MQTT. 
+
+Например:
+>ps aux | grep mosquitto
+
+Ответ будет в виде
+192.168.1.110
+10.13.13.51
+
+Вы можете использовать MQTT-клиент, такой, как Mosquitto Sub или другой, чтобы подключиться к брокеру на вашей локальной машине и проверить, отвечает ли он на запросы. 
+Например:
+
+>mosquitto_sub -h localhost -t "test/topic"
+
+>mosquitto_sub -h 192.168.1.110:1883 -t "test/topic"
+
+>mosquitto_sub -h localhost -t "test/topic" //Подписались на test/topic
+
+>mosquitto_pub -h localhost -t "test/topic" -m "Hello, MQTT!"//Опубликовали сообщение в test/topic
 
 # Associated resources
 - Introduction and review video: [youtu.be/zXzmXzBmWdY](https://youtu.be/zXzmXzBmWdY)

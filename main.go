@@ -19,6 +19,7 @@ const mqttClientID = "some-unique-string" //Идентификатор клие�
 const tempTopic = "/temperature"
 const actionTopic = "/action"
 const monitorTopic = "/monitor"
+const newObjectRegistryTopic = "/new_object_registry"
 
 // temperature thresholds that we take actions based on.
 var minTemp float64 = 28.0
@@ -123,32 +124,3 @@ func greeter() {
 	fmt.Println("* * * HELLO FROM MQTT MONITORING SERVER * * *")
 	fmt.Println("=============================================")
 }
-
-/*
-Используйте команду netstat в командной строке, чтобы посмотреть, какие порты открыты на вашей локальной машине. Например:
-netstat -tuln
-
-Используйте команды для просмотра процессов и поиска брокера MQTT. Например:
-
-ps aux | grep mosquitto
-
-Вы можете использовать MQTT-клиент, такой как Mosquitto Sub или другой, чтобы подключиться к брокеру на вашей локальной машине и проверить, отвечает ли он на запросы. Например:
-
-mosquitto_sub -h localhost -t "test/topic"
-192.168.1.110
-10.13.13.51
-
-mosquitto_sub -h 192.168.1.110:1883 -t "test/topic"
-
-mosquitto_sub -h localhost -t "test/topic" //Подписались на test/topic
-
-mosquitto_pub -h localhost -t "test/topic" -m "Hello, MQTT!"//Опубликовали сообщение в test/topic
-
-Останавливаем брокера:
-brew services stop mosquitto
-
-или
-pkill mosquitto
-
-
-*/
